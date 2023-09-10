@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  starter-api:
+    container_name: starter-api
+    restart: "no"
+    build: .
+    networks:
+      - web
+    volumes:
+      - "./app:/app"
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - ./.env
+
+  starter-mongo:
+    container_name: starter-mongo
+    image: "mongo"
+    restart: "no"
+    networks:
+      - web
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+    volumes:
+      - "./mongo:/data/db"
+
+networks:
+  web:
+    external:
+      name: ${TRAEFIK_NETWORK}
