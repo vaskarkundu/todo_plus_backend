@@ -9,14 +9,11 @@ if(!empty($postData)){
 
     require_once "scripts/auth.php";
     $data = json_decode($postData, true);
-
     if($data['route']=="signin"){
+       
         $response = new Authenticate($data);
         
-    }
-    // echo "Received Data:\n";
-    // print_r($data);
-    
+    }  
 }else{
     echo "<h1>NOT FOUND</h1>";
 }
