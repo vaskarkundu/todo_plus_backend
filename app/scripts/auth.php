@@ -9,9 +9,13 @@
 
         $conn = $connection->getConnection();
 
-        $route = $data['route'];
+        self::handleRoute( $conn,$data); 
+    }
 
-        
+
+    static private function handleRoute( $conn,$data)
+    {
+          $route = $data['route'];
         if ($route == 'signup') {
             self::signup($conn, $data);    
         
@@ -20,7 +24,7 @@
             echo json_encode($response);
            
         }
-  
+       
     }
 
 
@@ -74,8 +78,6 @@
             return;
         }
         
-        
-
         $query = "SELECT * FROM todo_profile_list WHERE email = '$email'";
         $result = mysqli_query($conn, $query);
 
