@@ -2,7 +2,7 @@
  class Authenticate{
 
 
-    public function __construct($data){
+    function __construct($data){
         include_once "connection.php";
 
         $connection = new Connection();
@@ -13,7 +13,7 @@
 
         
         if ($route == 'signup') {
-            $this->signup($conn, $data);
+            self::signup($conn, $data);    
         
         } else{
             $response = ['status' => 404, 'msg' => "Route not found"];
@@ -26,40 +26,76 @@
 
     static private function signup($conn,$data){
 
-    $username = $data['username'];
-    $email = $data['email'];
-    $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT); 
-    $firstname = $data['firstname'];
-    $lastname = $data['lastname'];
-    $dateOfBirth = $data['date_of_birth'];
+    
+        $username = $data['username'];
+        $email = $data['email'];
+        $firstname = $data['firstname'];
+        $lastname = $data['lastname'];
+        $dateOfBirth = $data['date_of_birth'];
+
+        $password = $data['password'];
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%!&])[A-Za-z\d@#$%!&]{8,}$/', $password)) {
+            $res = array('status' => 400, 'errMsg' => 'Password must meet the specified criteria.');
+            echo json_encode($res);
+            return;
+        }
+
+        $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT); 
+
+        if (!isset($username) || !is_string($username) || empty($username)) {
+            $res = array('status' => 400, 'msg' => 'Username must be a non-empty string.');
+            echo json_encode($res);
+            return;
+
+        }
+        if (!isset($firstname) || !is_string($firstname) || empty($firstname)) {
+            $res = array('status' => 400, 'msg' => 'Firstname must be a non-empty string.');
+            echo json_encode($res);
+            return;
+        
+
+        }
+        if (!isset($lastname) || !is_string($lastname) || empty($lastname)) {
+            $res = array('status' => 400, 'msg' => 'Lastname must be a non-empty string.');
+            echo json_encode($res);
+            return;
+
+        }
+
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $res = array('status' => 400, 'msg' => 'Invalid email address');
+            echo json_encode($res);
+            return;
+        }
+
+        if (strtotime($dateOfBirth) === false || strtotime($dateOfBirth) >= time()) {
+            $res = array('status' => 400, 'msg' => 'Invalid date of birth. It must be a valid date and previous to today.');
+            echo json_encode($res);
+            return;
+        }
+        
+        
+
+        $query = "SELECT * FROM todo_profile_list WHERE email = '$email'";
+        $result = mysqli_query($conn, $query);
+
+        if($result  && mysqli_num_rows($result) > 0){
+            $res =  array('status' => 400, 'msg' => 'This user is already exits');
+            echo json_encode($res);
+            return;
+        }
 
 
-    $query = "SELECT * FROM todo_profile_list WHERE email = '$email'";
+        $query = "INSERT INTO todo_profile_list (username, email, password, firstname, lastname, date_of_birth) 
+                  VALUES ('$username', '$email', '$hashedPassword', '$firstname', '$lastname', '$dateOfBirth')";
+
+   
     $result = mysqli_query($conn, $query);
-
-    if($result  && mysqli_num_rows($result) > 0){
-        $response = ['status' => 201, 'msg' => "This User already exits"];
-        return
-    }
-
-
-
-
-    // 
-    $query = "INSERT INTO todo_profile_list (username, email, password, firstname, lastname, date_of_birth) 
-           
-            --   VALUES ('john_doe', 'john@example.com', 'hashed_password', 'John', 'Doe', '1990-01-01')";
-
-   VALUES ('$username', '$email', '$hashedPassword', '$firstname', '$lastname', '$dateOfBirth')";
-
-    // Execute the query
-    $result = mysqli_query($conn, $query);
-
-    // Check if the query was successful
+ 
     if ($result) {
-        echo "User registration successful";
-        $response = ['status' => 200, 'msg' => "User Register Successfully"];
-        echo json_encode($response);
+        $res =  array('status' => 200, 'msg' => "User Register Successfully");
+        echo json_encode($res);
+
     } else {
         echo "Error: " . mysqli_error($conn);
     }
