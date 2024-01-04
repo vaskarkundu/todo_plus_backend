@@ -11,6 +11,9 @@ if(!empty($postData)){
     if($data['route']=="signup"){
         $response = new Authenticate($data);
         
+    }else if($data['route']=="login"){
+        $response = new Authenticate($data);
+        
     }  
 }else{
     echo "<h1>NOT FOUND</h1>";

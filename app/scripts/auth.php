@@ -1,11 +1,18 @@
 <?php
+    // require_once 'vendor/autoload.php';
+    use Firebase\JWT\JWT;
+
+
  class Authenticate{
+
+    private $jwtSecretKey = 'abcdalwejhfb12345';
 
 
     function __construct($data){
         include_once "connection.php";
 
         $connection = new Connection();
+        
 
         $conn = $connection->getConnection();
 
@@ -19,7 +26,10 @@
         if ($route == 'signup') {
             self::signup($conn, $data);    
         
-        } else{
+        }else if ($route == 'login') {
+            self::login($conn, $data);    
+        
+        }else{
             $response = ['status' => 404, 'msg' => "Route not found"];
             echo json_encode($response);
            
@@ -101,6 +111,29 @@
     } else {
         echo "Error: " . mysqli_error($conn);
     }
+
+    }
+
+
+    static private function login($conn, $data){
+
+        $username = $data['username'];
+        $password = $data['password'];
+
+
+        $query = "SELECT * FROM todo_profile_list WHERE email = '$username'";
+        $result = $conn->query($query);
+
+        if(mysqli_num_rows($result) == 0){
+            $res =  array('status' => 404, 'msg' => 'Username can not exist');
+            echo json_encode($res);
+            return;
+
+        }
+
+
+        print_r($data);
+        die();
 
     }
 
